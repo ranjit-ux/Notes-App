@@ -6,6 +6,8 @@ import jwt from "jsonwebtoken"
 import authenticateToken from "./utilities.js";
 import User from "./models/user.model.js";
 import Note from "./models/note.model.js";
+import path from "path";
+import { fileURLToPath } from "url";
 dotenv.config(); // load .env
 
 // Connect DB
@@ -152,6 +154,7 @@ app.get("/getusers", authenticateToken,async (req,res) => {
   return res.json({user: {fullName: isUser.fullName, email: isUser.email,id:isUser._id,createdOn: isUser.createdOn}});
 })
 
+
 //Add Note
 app.post("/addnote",authenticateToken, async (req,res) => {
   const  {title, content,tags} = req.body || {};
@@ -183,6 +186,7 @@ app.post("/addnote",authenticateToken, async (req,res) => {
     return res.status(500).json({error: true, message: "Internal Server Error"});
   }
 });
+
 
 //edit note
 app.post("/editnote/:noteId",authenticateToken,async (req,res)=>{
@@ -240,6 +244,7 @@ app.get("/getallnotes",authenticateToken, async (req,res)=>{
   }
 })
 
+
 //delete notes
 app.delete("/deletenote/:noteId", authenticateToken, async (req,res)=>{
   const noteId = req.params.noteId;
@@ -262,6 +267,7 @@ app.delete("/deletenote/:noteId", authenticateToken, async (req,res)=>{
     return res.status(500).json({error: true, message: "Internal Server Error"});
   }
 });
+
 
 //update isPinned
 app.put("/updatenotepinned/:noteId", authenticateToken, async (req,res)=>{
@@ -317,7 +323,18 @@ app.get("/searchnote", authenticateToken, async (req,res) => {
 
 })
 
-const PORT = process.env.PORT || 8000;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve frontend build
+app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
